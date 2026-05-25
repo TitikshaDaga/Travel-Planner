@@ -1,0 +1,6 @@
+{
+  "name": "Plan Your Own Trip",
+  "description": "A progressive web application for planning trips, co-planning with companions, logging budgets, and storing travel documents offline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "Trip": {
+      "title": "Trip",
+      "description": "Represents a planned trip including places, activities, transports, dining items, and documents.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "budget": { "type": "number" },
+        "coverImage": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "ownerEmail": { "type": "string" },
+        "ownerName": { "type": "string" },
+        "collaborators": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "places": { "type": "array" },
+        "activities": { "type": "array" },
+        "transport": { "type": "array" },
+        "dining": { "type": "array" },
+        "documents": { "type": "array" }
+      },
+      "required": ["id", "title", "startDate", "endDate", "budget", "ownerId", "ownerEmail"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Public profile details of users.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/trips/{tripId}": {
+      "schema": "Trip",
+      "description": "Complete trip planner collection access."
+    },
+    "/users/{userId}/public/profile": {
+      "schema": "UserProfile",
+      "description": "UserProfile public details."
+    }
+  }
+}
