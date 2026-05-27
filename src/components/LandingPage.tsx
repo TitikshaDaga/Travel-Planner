@@ -18,17 +18,35 @@ import {
   CloudLightning,
   AlertTriangle,
   Play,
-  RotateCcw
+  RotateCcw,
+  ArrowLeft,
+  Mail,
+  User
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { dbService } from '../lib/db';
 
 interface LandingPageProps {
-  onLogin: () => void;
+  onLogin: (customEmail?: string, customName?: string) => void;
 }
 
 export default function LandingPage({ onLogin }: LandingPageProps) {
   const [activePreviewTab, setActivePreviewTab] = useState<'schedule' | 'finance' | 'documents' | 'group'>('schedule');
   const [pwaPlatform, setPwaPlatform] = useState<'ios' | 'android'>('ios');
+
+  const [showGoogleMockAuth, setShowGoogleMockAuth] = useState(false);
+  const [mockEmail, setMockEmail] = useState('');
+  const [mockName, setMockName] = useState('');
+  const [showCustomEmailInput, setShowCustomEmailInput] = useState(false);
+  const [authError, setAuthError] = useState('');
+
+  const handleLoginClick = () => {
+    if (dbService.isMockEnabled()) {
+      setShowGoogleMockAuth(true);
+    } else {
+      onLogin();
+    }
+  };
 
   // Animation constants
   const containerVariants = {
@@ -78,14 +96,14 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         <div className="flex items-center gap-2 shrink-0">
           <button 
             id="header_cta_login"
-            onClick={onLogin}
+            onClick={handleLoginClick}
             className="hidden sm:block px-3 py-1.5 text-[11px] font-bold text-slate-700 bg-slate-100/80 hover:bg-slate-200/80 rounded-xl transition cursor-pointer"
           >
             Access Dashboard
           </button>
           <button 
             id="header_cta_primary"
-            onClick={onLogin}
+            onClick={handleLoginClick}
             className="px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-100 transition cursor-pointer flex items-center gap-1"
           >
             <span>Start Free</span> <ArrowRight className="w-3 h-3" />
@@ -131,7 +149,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         >
           <button 
             id="hero_primary_button"
-            onClick={onLogin}
+            onClick={handleLoginClick}
             className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-indigo-100 hover:shadow-indigo-200 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             Start Your Sandbox Free <ArrowRight className="w-4 h-4" />
@@ -424,7 +442,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               <div className="pt-4 border-t border-slate-100 text-[10px] text-slate-400 flex flex-wrap justify-between items-center gap-2">
                 <span>⚡ Interactive Demo Sandbox • Changes are transient</span>
                 <button 
-                  onClick={onLogin}
+                  onClick={handleLoginClick}
                   className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold underline rounded cursor-pointer"
                 >
                   Create Your Custom Account Board Now →
@@ -863,7 +881,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center">
               <button 
-                onClick={onLogin}
+                onClick={handleLoginClick}
                 className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm rounded-2xl shadow-xl transition-all h-14 cursor-pointer flex items-center justify-center gap-2"
               >
                 Sign In & Plan Your Own Trip <ArrowRight className="w-4 h-4" />
@@ -932,6 +950,249 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           </div>
         </div>
       </footer>
+
+      {showGoogleMockAuth && (
+        <div className="fixed inset-0 z-[9999] bg-[#f0f4f9]/98 md:bg-slate-900/60 md:backdrop-blur-xs flex flex-col md:items-center md:justify-center overflow-y-auto p-4 select-none font-sans text-slate-900">
+          {/* Main Container Card */}
+          <div className="bg-white md:border md:border-[#dadce0] rounded-none md:rounded-3xl max-w-[450px] w-full min-h-[520px] p-6 md:p-10 shadow-none md:shadow-2xl flex flex-col justify-between mx-auto my-auto relative">
+            
+            {/* Top Close icon */}
+            <button 
+              onClick={() => {
+                setShowGoogleMockAuth(false);
+                setShowCustomEmailInput(false);
+                setMockEmail('');
+                setMockName('');
+                setAuthError('');
+              }}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              title="Close Panel"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-6">
+              {/* Google SVG Logo */}
+              <div className="text-center">
+                <svg className="w-12 h-12 md:w-14 md:h-14 mx-auto" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+                <h2 className="text-[22px] md:text-2xl font-normal text-[#202124] mt-4 tracking-tight">
+                  {showCustomEmailInput ? "Sign in with Google" : "Choose an account"}
+                </h2>
+                <p className="text-sm text-[#5f6368] mt-1.5">
+                  to continue to <span className="text-indigo-600 font-semibold">Plan Your Own Trip</span>
+                </p>
+              </div>
+
+              {/* Error State */}
+              {authError && (
+                <div id="auth_error_message" className="bg-rose-50 border border-rose-100 rounded-xl p-3 text-rose-700 text-xs font-medium text-center">
+                  {authError}
+                </div>
+              )}
+
+              {/* Stage A: Account list chooser */}
+              {!showCustomEmailInput && (
+                <div className="space-y-2 max-h-[280px] overflow-y-auto">
+                  
+                  {/* Account 1: Titiksha Daga */}
+                  <button
+                    onClick={() => {
+                      onLogin('titikshadaga19@gmail.com', 'Titiksha Daga');
+                      setShowGoogleMockAuth(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 text-left border border-slate-200 hover:border-slate-300 hover:bg-[#f8fafd] rounded-2xl transition cursor-pointer group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-extrabold text-sm shrink-0 border border-indigo-200 group-hover:scale-105 transition-transform">
+                      TD
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[#3c4043] truncate">Titiksha Daga</p>
+                      <p className="text-xs text-[#5f6368] truncate">titikshadaga19@gmail.com</p>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shrink-0">Owner</span>
+                  </button>
+
+                  {/* Account 2: Lisa Milton */}
+                  <button
+                    onClick={() => {
+                      onLogin('lisa.milton@outlook.com', 'Lisa Milton');
+                      setShowGoogleMockAuth(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 text-left border border-slate-200 hover:border-slate-300 hover:bg-[#f8fafd] rounded-2xl transition cursor-pointer group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center text-white font-extrabold text-sm shrink-0 border border-amber-200 group-hover:scale-105 transition-transform">
+                      LM
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[#3c4043] truncate">Lisa Milton</p>
+                      <p className="text-xs text-[#5f6368] truncate">lisa.milton@outlook.com</p>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider font-mono font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded shrink-0">Guest</span>
+                  </button>
+
+                  {/* Option 3: Use another account */}
+                  <button
+                    onClick={() => {
+                      setShowCustomEmailInput(true);
+                      setAuthError('');
+                    }}
+                    className="w-full flex items-center gap-3 p-3 text-left border border-slate-100 hover:border-slate-300 hover:bg-[#f8fafd] rounded-2xl transition cursor-pointer group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 group-hover:bg-slate-200 transition-colors">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-slate-700">Use another account</p>
+                      <p className="text-xs text-slate-400">Authenticate with any Gmail address</p>
+                    </div>
+                  </button>
+
+                </div>
+              )}
+
+              {/* Stage B: Custom email / Gmail input form */}
+              {showCustomEmailInput && (
+                <div className="grid grid-cols-1 gap-4 py-1 text-slate-700">
+                  
+                  {/* Email Input Field */}
+                  <div className="space-y-1.5 relative">
+                    <label className="text-[11px] font-bold text-[#5f6368] uppercase tracking-wider">Email or Phone</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                      <input 
+                        type="email"
+                        required
+                        placeholder="yourname@gmail.com"
+                        value={mockEmail}
+                        onChange={(e) => {
+                          setMockEmail(e.target.value);
+                          setAuthError('');
+                        }}
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-[#dadce0] rounded-xl text-sm focus:outline-[#1a73e8] text-slate-800 placeholder-slate-400"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            document.getElementById('google_primary_signin_btn')?.click();
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Name Input Field */}
+                  <div className="space-y-1.5 relative">
+                    <label className="text-[11px] font-bold text-[#5f6368] uppercase tracking-wider">Your Full Name (Optional)</label>
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                      <input 
+                        type="text"
+                        placeholder="e.g. John Doe"
+                        value={mockName}
+                        onChange={(e) => setMockName(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-[#dadce0] rounded-xl text-sm focus:outline-[#1a73e8] text-slate-800 placeholder-slate-400"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            document.getElementById('google_primary_signin_btn')?.click();
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+
+            {/* Bottom Actions Row */}
+            <div className="pt-8 flex items-center justify-between gap-4 mt-auto">
+              
+              {/* Back Button / Cancel */}
+              {showCustomEmailInput ? (
+                <button
+                  onClick={() => {
+                    setShowCustomEmailInput(false);
+                    setAuthError('');
+                  }}
+                  className="px-4 py-2 text-[#1a73e8] hover:bg-[#f6f9fe] font-bold text-sm rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowGoogleMockAuth(false);
+                    setAuthError('');
+                  }}
+                  className="px-4 py-2 text-[#5f6368] hover:bg-slate-100 font-semibold text-sm rounded-xl transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+              )}
+
+              {/* Primary Next/Sign In button if custom mode is open */}
+              {showCustomEmailInput && (
+                <button
+                  id="google_primary_signin_btn"
+                  onClick={() => {
+                    const emailTrimmed = mockEmail.trim();
+                    if (!emailTrimmed) {
+                      setAuthError('Please enter an email address to authenticate with Gmail.');
+                      return;
+                    }
+                    if (!emailTrimmed.includes('@') || emailTrimmed.length < 5) {
+                      setAuthError('Please enter a valid Gmail or email address.');
+                      return;
+                    }
+                    
+                    onLogin(emailTrimmed, mockName.trim() || undefined);
+                    setShowGoogleMockAuth(false);
+                    setShowCustomEmailInput(false);
+                    setMockEmail('');
+                    setMockName('');
+                  }}
+                  className="px-6 py-2.5 bg-[#1a73e8] hover:bg-[#155fc0] text-white font-bold text-sm rounded-xl transition shrink-0 cursor-pointer shadow-sm"
+                >
+                  Sign In
+                </button>
+              )}
+
+            </div>
+
+          </div>
+
+          {/* Authentic Google Footer */}
+          <div className="max-w-[450px] w-full mx-auto mt-4 px-4 flex flex-wrap justify-between gap-x-4 gap-y-2 text-xs text-[#5f6368] font-sans">
+            <div>
+              <span className="cursor-pointer hover:text-slate-800 transition">English (United States)</span>
+            </div>
+            <div className="flex gap-4">
+              <span className="cursor-pointer hover:text-slate-800 transition">Help</span>
+              <span className="cursor-pointer hover:text-slate-800 transition">Privacy</span>
+              <span className="cursor-pointer hover:text-slate-800 transition">Terms</span>
+            </div>
+          </div>
+
+        </div>
+      )}
 
     </div>
   );

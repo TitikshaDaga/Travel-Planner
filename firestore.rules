@@ -31,7 +31,7 @@ service cloud.firestore {
     function isValidTrip(data) {
       return data.id is string && data.id.size() <= 128
         && data.title is string && data.title.size() <= 100 && data.title.size() > 0
-        && (data.description == null || (data.description is string && data.description.size() <= 1000))
+        && (!('description' in data) || data.description == null || (data.description is string && data.description.size() <= 1000))
         && data.startDate is string && data.startDate.size() <= 30
         && data.endDate is string && data.endDate.size() <= 30
         && data.budget is number && data.budget >= 0

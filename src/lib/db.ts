@@ -37,6 +37,9 @@ if (!isMockFirebase) {
     db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
     auth = getAuth(app);
     googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
   } catch (error) {
     console.error("Failed to initialize Firebase with real config:", error);
   }
@@ -167,14 +170,19 @@ export const dbService = {
   },
 
   // Auth operations
-  async loginWithGoogle(): Promise<UserProfile> {
+  async loginWithGoogle(customEmail?: string, customName?: string): Promise<UserProfile> {
     if (this.isMockEnabled() || !auth || !googleProvider) {
-      // Return beautiful mock user
+      // Return custom mock user based on chosen details
+      const email = customEmail || 'titikshadaga19@gmail.com';
+      const displayName = customName || email.split('@')[0].split('.').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+      const cleanEmail = email.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const uid = `user_mock_${cleanEmail || '123'}`;
+      
       const mockUser: UserProfile = {
-        uid: 'user_mock_123',
-        email: 'titikshadaga19@gmail.com',
-        displayName: 'Titiksha Daga',
-        photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces'
+        uid: uid,
+        email: email,
+        displayName: displayName,
+        photoURL: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`
       };
       saveOfflineUser(mockUser);
       return mockUser;

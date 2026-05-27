@@ -1,9 +1,10 @@
 {
-  "apiKey": "MOCK_API_KEY_PLACEHOLDER",
-  "authDomain": "mock-app.firebaseapp.com",
-  "projectId": "mock-app-project",
-  "storageBucket": "mock-app.appspot.com",
-  "messagingSenderId": "1234567890",
-  "appId": "1:1234567890:web:abcdef0123456",
-  "firestoreDatabaseId": "(default)"
+  "projectId": "charged-valve-3fbwx",
+  "appId": "1:687951919358:web:f6ae7c1b6b74a18b9a0daf",
+  "apiKey": "AIzaSyAzeZPUYf3Ln23y8rXBPRt7Ky6hkQ-2h9Y",
+  "authDomain": "charged-valve-3fbwx.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-b2a82e52-5534-470f-8ced-f8086fbd3a48",
+  "storageBucket": "charged-valve-3fbwx.firebasestorage.app",
+  "messagingSenderId": "687951919358",
+  "measurementId": ""
 }

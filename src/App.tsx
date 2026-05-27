@@ -90,9 +90,9 @@ export default function App() {
     fetchTripsData();
   }, [currentUser, isOnlineSimulated]);
 
-  const handleLogin = async () => {
+  const handleLogin = async (customEmail?: string, customName?: string) => {
     try {
-      const user = await dbService.loginWithGoogle();
+      const user = await dbService.loginWithGoogle(customEmail, customName);
       setCurrentUser(user);
     } catch (e) {
       alert("Failed Google Auth. Please check your credentials or run in mock mode.");
@@ -109,42 +109,48 @@ export default function App() {
     e.preventDefault();
     if (!currentUser || !newTripTitle || !newTripStart || !newTripEnd) return;
 
-    const newTripId = 'trip_' + Date.now();
-    const newTrip: Trip = {
-      id: newTripId,
-      title: newTripTitle,
-      startDate: newTripStart,
-      endDate: newTripEnd,
-      budget: Number(newTripBudget) || 1000,
-      currency: newTripCurrency,
-      ownerId: currentUser.uid,
-      ownerEmail: currentUser.email,
-      ownerName: currentUser.displayName || 'Traveler',
-      collaborators: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      places: [],
-      activities: [],
-      transport: [],
-      dining: [],
-      documents: []
-    };
+    try {
+      const newTripId = 'trip_' + Date.now();
+      const newTrip: Trip = {
+        id: newTripId,
+        title: newTripTitle,
+        description: newTripDesc || '',
+        startDate: newTripStart,
+        endDate: newTripEnd,
+        budget: Number(newTripBudget) || 1000,
+        currency: newTripCurrency,
+        ownerId: currentUser.uid,
+        ownerEmail: currentUser.email,
+        ownerName: currentUser.displayName || 'Traveler',
+        collaborators: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        places: [],
+        activities: [],
+        transport: [],
+        dining: [],
+        documents: []
+      };
 
-    await dbService.saveTrip(newTrip);
-    
-    // reset form
-    setNewTripTitle('');
-    setNewTripDesc('');
-    setNewTripStart('');
-    setNewTripEnd('');
-    setNewTripBudget(2000);
-    setNewTripCurrency('USD');
-    setShowAddTripModal(false);
-    
-    // Refresh & view newly created trip instantly
-    await fetchTripsData();
-    setSelectedTrip(newTrip);
-    setActiveSubTab('schedule');
+      await dbService.saveTrip(newTrip);
+      
+      // reset form
+      setNewTripTitle('');
+      setNewTripDesc('');
+      setNewTripStart('');
+      setNewTripEnd('');
+      setNewTripBudget(2000);
+      setNewTripCurrency('USD');
+      setShowAddTripModal(false);
+      
+      // Refresh & view newly created trip instantly
+      await fetchTripsData();
+      setSelectedTrip(newTrip);
+      setActiveSubTab('schedule');
+    } catch (err: any) {
+      console.error("Error creating journey:", err);
+      alert(`Could not save journey: ${err.message || 'Unknown database write error'}`);
+    }
   };
 
   const handleUpdateTripDetails = async (updatedTrip: Trip) => {
