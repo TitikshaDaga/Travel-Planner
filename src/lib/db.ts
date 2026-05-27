@@ -118,7 +118,16 @@ const USER_KEY = `${STORAGE_PREFIX}user`;
 function getOfflineTrips(): Trip[] {
   try {
     const data = localStorage.getItem(TRIPS_KEY);
-    return data ? JSON.parse(data) : [];
+    if (data !== null) {
+      const parsed: Trip[] = JSON.parse(data);
+      // Filter out any leftover seed data permanently
+      const cleaned = parsed.filter(t => t.id !== 'trip_swiss_alps' && !t.title?.includes('Swiss Alps'));
+      if (cleaned.length !== parsed.length) {
+        saveOfflineTrips(cleaned);
+      }
+      return cleaned;
+    }
+    return [];
   } catch (e) {
     console.error("Failed to read offline trips cache:", e);
     return [];
@@ -244,46 +253,6 @@ export const dbService = {
     );
 
     if (this.isMockEnabled() || !db) {
-      // If mock mode is working, and the user has no trips yet, seeding a delightful mock trip to let them test sharing & expected vs actual analytics is perfect!
-      if (filteredTrips.length === 0) {
-        const seeded: Trip = {
-          id: 'swiss-alps-2026',
-          title: 'Summer in the Swiss Alps',
-          description: 'A breathtaking hiking adventure with friends.',
-          startDate: '2026-07-10',
-          endDate: '2026-07-18',
-          budget: 2500,
-          coverImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop',
-          ownerId: userId || 'user_mock_123',
-          ownerEmail: userEmail || 'titikshadaga19@gmail.com',
-          ownerName: 'Titiksha Daga',
-          collaborators: ['amit.shah@gmail.com', 'lisa.traveler@outlook.com'],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          places: [
-            { id: 'p1', name: 'Zermatt Alpine Village', expectedCost: 200, actualCost: 180, expectedTime: '6h', actualTime: '5.5h', date: '2026-07-11', completed: true, notes: 'Stunning view of the Matterhorn!' },
-            { id: 'p2', name: 'Interlaken Lakes', expectedCost: 150, actualCost: 165, expectedTime: '4h', actualTime: '4.5h', date: '2026-07-13', completed: true, notes: 'Took the ferry.' }
-          ],
-          activities: [
-            { id: 'a1', name: 'Paragliding Hike', expectedCost: 180, actualCost: 180, expectedTime: '3h', actualTime: '3h', date: '2026-07-12', completed: true, location: 'Interlaken Meadows' },
-            { id: 'a2', name: 'Matterhorn Glacier Palace Ride', expectedCost: 95, actualCost: 95, expectedTime: '2h', actualTime: '2.5h', date: '2026-07-11', completed: false }
-          ],
-          transport: [
-            { id: 't1', type: 'Train', provider: 'SBB Rail', details: 'Zurich Airport to Zermatt direct train', expectedCost: 110, actualCost: 110, expectedTime: '3.5h', actualTime: '3.5h', completed: true },
-            { id: 't2', type: 'Car', provider: 'Sixt Car Rental', details: 'Compact AWD Rental', expectedCost: 400, actualCost: 430, expectedTime: '4 days', actualTime: '4 days', completed: false }
-          ],
-          dining: [
-            { id: 'd1', name: 'Walliserkanne', cuisine: 'Traditional Fondue', expectedCost: 80, actualCost: 95, expectedTime: '2h', actualTime: '2.5h', completed: true, notes: 'Ordered extra cheese truffle fondue.' },
-            { id: 'd2', name: 'Restaurant spycher', cuisine: 'Swiss Grill', expectedCost: 120, actualCost: 0, expectedTime: '2h', actualTime: '0h', completed: false }
-          ],
-          documents: [
-            { id: 'doc1', title: 'SBB Train SuperSaver Pass', type: 'boarding_pass', confCode: 'CONF-88481A', notes: 'Keep QR code ready.', createdAt: new Date().toISOString() },
-            { id: 'doc2', title: 'Matterhorn Swiss Lodge Booking', type: 'hotel', confCode: 'SL-7762X', notes: 'Check-in from 2:00 PM', createdAt: new Date().toISOString() }
-          ]
-        };
-        filteredTrips = [seeded];
-        saveOfflineTrips([seeded]);
-      }
       return filteredTrips;
     }
 
@@ -307,12 +276,15 @@ export const dbService = {
         }
       });
 
+      // Filter out any seed database remnants from Firestore results
+      const userGeneratedOnly = listTrips.filter(t => t.id !== 'trip_swiss_alps' && !t.title?.includes('Swiss Alps'));
+
       // Merge and save to offline cache
       const oldOffline = getOfflineTrips().filter(t => t.ownerId !== userId);
-      const mergedOffline = [...oldOffline, ...listTrips];
+      const mergedOffline = [...oldOffline, ...userGeneratedOnly];
       saveOfflineTrips(mergedOffline);
 
-      return listTrips;
+      return userGeneratedOnly;
     } catch (err) {
       console.warn("Firestore error reading trips, using cache fallback:", err);
       // Fallback to offline filtered cache

@@ -44,6 +44,17 @@ export default function FinanceHub({ trip }: FinanceHubProps) {
   const isOverBudget = actualCost > trip.budget;
   const remainingBudget = Math.max(0, trip.budget - actualCost);
 
+  const symbol = trip.currency ? (
+    trip.currency === 'USD' ? '$' :
+    trip.currency === 'EUR' ? '€' :
+    trip.currency === 'GBP' ? '£' :
+    trip.currency === 'CHF' ? 'CHF ' :
+    trip.currency === 'JPY' ? '¥' :
+    trip.currency === 'CAD' ? 'CA$' :
+    trip.currency === 'AUD' ? 'A$' :
+    trip.currency === 'INR' ? '₹' : '$'
+  ) : '$';
+
   // Category breakdowns
   const getCategoryStats = () => {
     const categories = [
@@ -93,7 +104,7 @@ export default function FinanceHub({ trip }: FinanceHubProps) {
             </span>
           </div>
           <div className="mt-4">
-            <h4 className="font-mono text-3xl font-extrabold text-slate-900">${trip.budget.toLocaleString()}</h4>
+            <h4 className="font-mono text-3xl font-extrabold text-slate-900">{symbol}{trip.budget.toLocaleString()}</h4>
             <p className="text-slate-400 text-xs mt-1">Starting reference limit</p>
           </div>
         </div>
@@ -106,7 +117,7 @@ export default function FinanceHub({ trip }: FinanceHubProps) {
             </span>
           </div>
           <div className="mt-4">
-            <h4 className="font-mono text-3xl font-extrabold text-slate-800">${expectedCost.toLocaleString()}</h4>
+            <h4 className="font-mono text-3xl font-extrabold text-slate-800">{symbol}{expectedCost.toLocaleString()}</h4>
             <p className="text-slate-400 text-xs mt-1">Total items estimated</p>
           </div>
         </div>
@@ -119,9 +130,9 @@ export default function FinanceHub({ trip }: FinanceHubProps) {
             </span>
           </div>
           <div className="mt-4">
-            <h4 className={`font-mono text-3xl font-extrabold ${isOverBudget ? 'text-rose-700' : 'text-emerald-700'}`}>${actualCost.toLocaleString()}</h4>
+            <h4 className={`font-mono text-3xl font-extrabold ${isOverBudget ? 'text-rose-700' : 'text-emerald-700'}`}>{symbol}{actualCost.toLocaleString()}</h4>
             <p className={`text-xs mt-1 ${isOverBudget ? 'text-rose-500 font-medium' : 'text-slate-400'}`}>
-              {isOverBudget ? `Over budget by $${(actualCost - trip.budget).toLocaleString()}!` : 'Based on completed items'}
+              {isOverBudget ? `Over budget by ${symbol}${(actualCost - trip.budget).toLocaleString()}!` : 'Based on completed items'}
             </p>
           </div>
         </div>
@@ -134,7 +145,7 @@ export default function FinanceHub({ trip }: FinanceHubProps) {
             </span>
           </div>
           <div className="mt-4">
-            <h4 className="font-mono text-3xl font-extrabold text-slate-900">${remainingBudget.toLocaleString()}</h4>
+            <h4 className="font-mono text-3xl font-extrabold text-slate-900">{symbol}{remainingBudget.toLocaleString()}</h4>
             <p className="text-slate-400 text-xs mt-1">
               {limitPercent >= 100 ? 'Budget fully utilized' : `${100 - limitPercent}% allowance left`}
             </p>
@@ -148,7 +159,7 @@ export default function FinanceHub({ trip }: FinanceHubProps) {
         <div className="flex items-center justify-between font-mono text-xs mb-2">
           <span>0%</span>
           <span className="text-emerald-400 font-bold">{limitPercent}% Consumed</span>
-          <span>Budget Limit (${trip.budget})</span>
+          <span>Budget Limit ({symbol}{trip.budget})</span>
         </div>
         <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden flex">
           <div 
@@ -190,9 +201,9 @@ export default function FinanceHub({ trip }: FinanceHubProps) {
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-slate-700">{cat.name}</span>
                   <div className="font-mono text-slate-500 space-x-2">
-                    <span>Est: ${cat.expected.toLocaleString()}</span>
+                    <span>Est: {symbol}{cat.expected.toLocaleString()}</span>
                     <span>•</span>
-                    <span className="font-bold text-slate-900">Act: ${cat.actual.toLocaleString()}</span>
+                    <span className="font-bold text-slate-900">Act: {symbol}{cat.actual.toLocaleString()}</span>
                     {deviationPercent !== 0 && cat.expected > 0 && (
                       <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${deviationPercent > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
                         {deviationPercent > 0 ? `+${deviationPercent}%` : `${deviationPercent}%`}

@@ -5,6 +5,7 @@ import TimelineManager from './components/TimelineManager';
 import FinanceHub from './components/FinanceHub';
 import DocumentManager from './components/DocumentManager';
 import CollaboratorsConfig from './components/CollaboratorsConfig';
+import LandingPage from './components/LandingPage';
 import { 
   Calendar, 
   Compass, 
@@ -50,9 +51,12 @@ export default function App() {
   const [newTripEnd, setNewTripEnd] = useState('');
   const [newTripBudget, setNewTripBudget] = useState<number>(2000);
   const [newTripImg, setNewTripImg] = useState(COVER_IMAGES[0].url);
+  const [newTripCurrency, setNewTripCurrency] = useState('USD');
 
   // Active sub-tab inside selectedTrip: 'schedule' | 'documents' | 'finance' | 'collab'
   const [activeSubTab, setActiveSubTab] = useState<'schedule' | 'documents' | 'finance' | 'collab'>('schedule');
+
+  const [isWipingConfirm, setIsWipingConfirm] = useState(false);
 
   // Sync auth state
   useEffect(() => {
@@ -109,11 +113,10 @@ export default function App() {
     const newTrip: Trip = {
       id: newTripId,
       title: newTripTitle,
-      description: newTripDesc || undefined,
       startDate: newTripStart,
       endDate: newTripEnd,
       budget: Number(newTripBudget) || 1000,
-      coverImage: newTripImg,
+      currency: newTripCurrency,
       ownerId: currentUser.uid,
       ownerEmail: currentUser.email,
       ownerName: currentUser.displayName || 'Traveler',
@@ -135,6 +138,7 @@ export default function App() {
     setNewTripStart('');
     setNewTripEnd('');
     setNewTripBudget(2000);
+    setNewTripCurrency('USD');
     setShowAddTripModal(false);
     
     // Refresh & view newly created trip instantly
@@ -170,66 +174,31 @@ export default function App() {
 
   // Login Screen if unauthorized
   if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
-        {/* Decorative Grid Line styling */}
-        <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none opacity-60"></div>
-
-        <div className="w-full max-w-md bg-white border border-slate-200 p-8 rounded-3xl relative z-10 space-y-8 shadow-xl">
-          <div className="text-center space-y-2">
-            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-4 shadow-lg shadow-indigo-100">
-              <CompassIcon className="w-6 h-6 animate-spin-slow" />
-            </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Plan Your Own Trip</h1>
-            <p className="text-slate-500 text-xs px-2 mx-auto max-w-xs">
-              Plan destinations, log actual vs expected expenses, and coordinate stored passes with co-planners—anywhere, fully offline.
-            </p>
-          </div>
-
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5 text-xs text-slate-600">
-            <span className="font-bold flex items-center gap-1.5 text-slate-800">
-              ⚡ Multi-User & Offline Cache Guard
-            </span>
-            <p>Runs dual-state sync. If Firebase database credentials aren't initialized yet, the app activates full-fidelity browser mock synchronization automatically containing pre-loaded template trips.</p>
-          </div>
-
-          <button
-            onClick={handleLogin}
-            className="w-full py-3 px-4 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs transition uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer h-12 shadow-md shadow-indigo-100"
-          >
-            Sign In with Google Account
-          </button>
-
-          <div className="text-center">
-            <span className="text-[10px] text-slate-400 font-mono">Compatible with Offline Mode</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <LandingPage onLogin={handleLogin} />;
   }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
       {/* Top Navigation / Offline Simulator Bar */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 md:px-8 py-3.5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 md:px-8 py-2.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <button 
             onClick={() => setSelectedTrip(null)}
-            className="flex items-center gap-2 text-left cursor-pointer"
+            className="flex items-center gap-1.5 text-left cursor-pointer"
           >
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
-              W
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm shrink-0">
+              TL
             </div>
             <div className="hidden sm:block">
-              <h1 className="font-sans text-sm font-bold tracking-tight text-slate-800 uppercase">WanderPlan</h1>
-              <p className="text-[10px] text-slate-400 font-serif italic">Digital Travel Journal</p>
+              <h1 className="font-sans text-xs sm:text-sm font-bold tracking-tight text-slate-800 uppercase">Trip Ledger</h1>
+              <p className="text-[9px] text-slate-400 font-serif italic">Digital Travel Journal</p>
             </div>
           </button>
 
           {/* Simulated Offline Toggler - satisfies requirement 4 */}
           <button
             onClick={() => setIsOnlineSimulated(!isOnlineSimulated)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition cursor-pointer border ${
+            className={`flex items-center gap-1 py-1 px-2 sm:px-3 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold tracking-wider uppercase transition cursor-pointer border shrink-0 ${
               isOnlineSimulated 
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                 : 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'
@@ -238,28 +207,71 @@ export default function App() {
           >
             {isOnlineSimulated ? (
               <>
-                <Wifi className="w-3.5 h-3.5" /> Simulated: Online
+                <Wifi className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden min-[480px]:inline">Simulated: Online</span>
+                <span className="min-[480px]:hidden">Online</span>
               </>
             ) : (
               <>
-                <WifiOff className="w-3.5 h-3.5" /> Simulated: Offline Cache Active
+                <WifiOff className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden min-[480px]:inline">Simulated: Offline Cache Active</span>
+                <span className="min-[480px]:hidden">Offline</span>
               </>
             )}
           </button>
         </div>
 
         {/* User Identity widget */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1.5 pr-3 rounded-full">
+        <div className="flex items-center gap-2 shrink-0">
+          {isWipingConfirm ? (
+            <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 py-1 px-1.5 sm:px-2.5 rounded-2xl shrink-0">
+              <span className="text-[9px] sm:text-[10px] text-rose-700 font-bold uppercase tracking-wider px-1">Confirm Purge All?</span>
+              <button
+                onClick={async () => {
+                  try {
+                    for (const trip of trips) {
+                      await dbService.deleteTrip(trip.id);
+                    }
+                    localStorage.removeItem('tripplanner_trips');
+                    setTrips([]);
+                    setSelectedTrip(null);
+                    setIsWipingConfirm(false);
+                  } catch (e) {
+                    console.error("Purge failure: ", e);
+                  }
+                }}
+                className="px-2 py-1 bg-red-650 hover:bg-red-700 text-white rounded-xl text-[9px] sm:text-[10px] font-bold transition cursor-pointer"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setIsWipingConfirm(false)}
+                className="px-2 py-1 border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 rounded-xl text-[9px] sm:text-[10px] font-semibold transition cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsWipingConfirm(true)}
+              className="p-1.5 sm:p-2 border border-rose-200 bg-rose-50/30 hover:bg-rose-50 text-rose-600 hover:text-rose-700 rounded-xl transition cursor-pointer flex items-center gap-1 shrink-0"
+              title="Delete All Data & Reset Application"
+            >
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-600 animate-pulse" />
+              <span className="hidden leading-none md:inline text-[10px] font-bold uppercase tracking-wider text-rose-700">Wipe Ledger</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 p-1 sm:p-1.5 sm:pr-3 rounded-full">
             {currentUser.photoURL ? (
               <img 
                 src={currentUser.photoURL} 
                 alt={currentUser.displayName || 'Avatar'} 
-                className="w-6 h-6 rounded-full border border-slate-300 pointer-events-none"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-slate-300 pointer-events-none"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="w-6 h-6 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center text-[10px]">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center text-[9px] sm:text-[10px]">
                 {currentUser.email.substring(0, 2).toUpperCase()}
               </div>
             )}
@@ -270,10 +282,10 @@ export default function App() {
 
           <button
             onClick={handleLogout}
-            className="p-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-xl transition cursor-pointer"
+            className="p-1.5 sm:p-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-xl transition cursor-pointer"
             title="Disconnect Account"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </header>
@@ -302,23 +314,35 @@ export default function App() {
               </button>
             </div>
 
-            {/* Banner Cover info */}
-            <div className="relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 text-slate-100 min-h-[160px] md:min-h-[200px] flex items-end p-6 md:p-8">
-              {selectedTrip.coverImage && (
-                <div 
-                  className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay pointer-events-none"
-                  style={{ backgroundImage: `url(${selectedTrip.coverImage})` }}
-                ></div>
-              )}
-              <div className="relative z-10 space-y-2">
-                <span className="text-[10px] uppercase font-bold text-indigo-400 bg-indigo-50 border border-indigo-150 px-2.5 py-1 rounded-full tracking-widest block w-fit">
-                  🇨🇭 Itinerary Route
+            {/* Elegant simplified trip info card */}
+            <div className="relative rounded-3xl bg-slate-900 border border-slate-800 text-slate-100 flex items-end p-6 md:p-8">
+              <div className="relative z-10 space-y-2 w-full">
+                <span className="text-[10px] uppercase font-bold text-indigo-400 bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-full tracking-widest block w-fit">
+                  🗺️ Itinerary Route Ledger
                 </span>
-                <h2 className="text-2xl md:text-3.5xl font-extrabold tracking-tight text-white">{selectedTrip.title}</h2>
-                <p className="text-slate-300 text-xs font-medium italic">{selectedTrip.description || 'No description designated'}</p>
-                <p className="text-[10px] font-mono text-emerald-400 bg-slate-950/60 inline-block px-2 py-0.5 rounded border border-slate-950/30">
-                  📅 Dates: {selectedTrip.startDate} — {selectedTrip.endDate}
-                </p>
+                <div className="flex flex-col md:flex-row md:items-start lg:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl md:text-3.5xl font-extrabold tracking-tight text-white">{selectedTrip.title}</h2>
+                    <p className="text-[10px] font-mono text-emerald-400 bg-slate-950 inline-block px-2.5 py-1 rounded border border-slate-800 mt-2">
+                      📅 Dates: {selectedTrip.startDate} — {selectedTrip.endDate}
+                    </p>
+                  </div>
+                  <div className="bg-slate-950 border border-slate-850 font-mono px-4 py-3 rounded-2xl flex flex-col items-start md:items-end md:self-center">
+                    <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Plan Budget</span>
+                    <strong className="text-lg text-indigo-450 mt-0.5">
+                      {selectedTrip.currency ? (
+                        selectedTrip.currency === 'USD' ? '$' :
+                        selectedTrip.currency === 'EUR' ? '€' :
+                        selectedTrip.currency === 'GBP' ? '£' :
+                        selectedTrip.currency === 'CHF' ? 'CHF ' :
+                        selectedTrip.currency === 'JPY' ? '¥' :
+                        selectedTrip.currency === 'CAD' ? 'CA$' :
+                        selectedTrip.currency === 'AUD' ? 'A$' :
+                        selectedTrip.currency === 'INR' ? '₹' : '$'
+                      ) : '$'}{selectedTrip.budget.toLocaleString()}
+                    </strong>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -398,10 +422,10 @@ export default function App() {
 
               <button 
                 onClick={() => setShowAddTripModal(true)}
-                className="p-5 border-2 border-dashed border-slate-300 hover:border-indigo-500 hover:bg-slate-50/50 text-slate-600 hover:text-indigo-600 rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer transition"
+                className="p-5 border-2 border-dashed border-slate-300 hover:border-indigo-500 hover:bg-slate-50/50 text-slate-600 hover:text-indigo-600 rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer transition select-none"
               >
-                <Plus className="w-6 h-6" />
-                <span className="text-xs font-bold uppercase tracking-wider">Create Future Itinerary</span>
+                <Plus className="w-6 h-6 text-indigo-500" />
+                <span className="text-xs font-bold uppercase tracking-wider mt-0.5">Create Future Itinerary</span>
               </button>
             </div>
 
@@ -417,16 +441,18 @@ export default function App() {
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest font-mono">Syncing Cloud Database</p>
               </div>
             ) : trips.length === 0 ? (
-              <div className="border border-dashed border-slate-200 p-16 text-center rounded-3xl bg-white space-y-3 shadow-sm">
+              <div className="border border-dashed border-slate-200 p-16 text-center rounded-3xl bg-white space-y-4 shadow-sm">
                 <Compass className="w-12 h-12 text-slate-300 mx-auto" />
                 <p className="text-slate-600 font-bold text-sm">No Active Trips Found</p>
                 <p className="text-slate-400 text-xs max-w-xs mx-auto">Get started by planning your first future journey! Log places, track dining costs and budgets.</p>
-                <button
-                  onClick={() => setShowAddTripModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-xs font-semibold mt-2 cursor-pointer shadow-sm"
-                >
-                  <Plus className="w-4 h-4" /> Start Planning
-                </button>
+                <div className="flex flex-wrap gap-3 justify-center pt-2">
+                  <button
+                    onClick={() => setShowAddTripModal(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-xs font-semibold cursor-pointer shadow-sm transition"
+                  >
+                    <Plus className="w-4 h-4" /> Start Planning
+                  </button>
+                </div>
               </div>
             ) : (
               // Active list grid
@@ -436,48 +462,50 @@ export default function App() {
                   const docCount = (trip.documents || []).length;
                   const completedStops = (trip.places || []).filter(p => p.completed).length;
 
+                  const symbol = trip.currency ? (
+                    trip.currency === 'USD' ? '$' :
+                    trip.currency === 'EUR' ? '€' :
+                    trip.currency === 'GBP' ? '£' :
+                    trip.currency === 'CHF' ? 'CHF ' :
+                    trip.currency === 'JPY' ? '¥' :
+                    trip.currency === 'CAD' ? 'CA$' :
+                    trip.currency === 'AUD' ? 'A$' :
+                    trip.currency === 'INR' ? '₹' : '$'
+                  ) : '$';
+
                   return (
                     <div 
                       key={trip.id}
-                      className="bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-slate-400 hover:shadow-md transition cursor-pointer flex flex-col h-full"
+                      className="bg-white border border-slate-200 rounded-3xl p-6 hover:border-slate-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between h-full space-y-5"
                       onClick={() => {
                         setSelectedTrip(trip);
                         setActiveSubTab('schedule');
                       }}
                     >
-                      {trip.coverImage && (
-                        <div 
-                          className="h-40 bg-cover bg-center border-b border-slate-100 relative pointer-events-none"
-                          style={{ backgroundImage: `url(${trip.coverImage})` }}
-                        >
-                          <div className="absolute top-3 left-3 bg-slate-950/75 border border-slate-800 text-[9px] uppercase font-bold tracking-widest text-emerald-400 px-2.5 py-1 rounded backdrop-blur-sm">
-                            Budget: ${trip.budget}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="font-sans text-sm font-bold text-slate-900 line-clamp-1">{trip.title}</h3>
+                          <div className="bg-slate-50 border border-slate-200 text-[10px] uppercase font-bold tracking-wider text-slate-600 font-mono px-2 py-0.5 rounded shrink-0">
+                            {symbol}{trip.budget}
                           </div>
                         </div>
-                      )}
-                      
-                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                        <div className="space-y-1.5">
-                          <h3 className="font-sans text-sm font-bold text-slate-900">{trip.title}</h3>
-                          <p className="text-slate-500 text-[11px] line-clamp-2 italic">{trip.description || 'No descriptive overview'}</p>
-                          <span className="text-[10px] font-mono text-slate-400 block pt-1">
-                            📅 {trip.startDate} — {trip.endDate}
-                          </span>
-                        </div>
+                        <span className="text-[10px] font-mono text-slate-400 block">
+                          📅 {trip.startDate} — {trip.endDate}
+                        </span>
+                      </div>
 
-                        <div className="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-xs text-slate-500">
-                          <div>
-                            <span className="text-[10px] text-slate-400 block font-semibold uppercase font-sans">Destinations</span>
-                            <strong className="font-mono text-slate-900 text-xs">{placeCount}</strong>
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 block font-semibold uppercase font-sans">Documents</span>
-                            <strong className="font-mono text-slate-900 text-xs">{docCount}</strong>
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 block font-semibold uppercase font-sans">Progress</span>
-                            <strong className="font-mono text-slate-900 text-xs">{placeCount > 0 ? `${Math.round((completedStops / placeCount) * 100)}%` : '0%'}</strong>
-                          </div>
+                      <div className="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-xs text-slate-500">
+                        <div>
+                          <span className="text-[9px] text-slate-400 block font-semibold uppercase font-sans">Stops</span>
+                          <strong className="font-mono text-slate-900 text-xs">{placeCount}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-slate-400 block font-semibold uppercase font-sans">Docs</span>
+                          <strong className="font-mono text-slate-900 text-xs">{docCount}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-slate-400 block font-semibold uppercase font-sans">Progress</span>
+                          <strong className="font-mono text-slate-900 text-xs">{placeCount > 0 ? `${Math.round((completedStops / placeCount) * 100)}%` : '0%'}</strong>
                         </div>
                       </div>
                     </div>
@@ -518,20 +546,9 @@ export default function App() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g., Summer in Swiss Alps"
+                  placeholder="e.g., Summer Getaway in Tokyo"
                   value={newTripTitle}
                   onChange={(e) => setNewTripTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-indigo-500 bg-white"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-slate-700 text-xs font-semibold">Overview / Short Description</label>
-                <input
-                  type="text"
-                  placeholder="e.g., A breathing hiking getaway with lisa and mark."
-                  value={newTripDesc}
-                  onChange={(e) => setNewTripDesc(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-indigo-500 bg-white"
                 />
               </div>
@@ -560,36 +577,37 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-slate-700 text-xs font-semibold flex items-center gap-1">
-                  <DollarSign className="w-3.5 h-3.5 text-slate-400" /> Planned Budget limit ($)
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  required
-                  value={newTripBudget}
-                  onChange={(e) => setNewTripBudget(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-indigo-500 font-mono bg-white"
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-slate-700 text-xs font-semibold flex items-center gap-1">
+                    <DollarSign className="w-3.5 h-3.5 text-slate-400" /> Planned Budget limit
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    required
+                    value={newTripBudget}
+                    onChange={(e) => setNewTripBudget(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-indigo-500 font-mono bg-white"
+                  />
+                </div>
 
-              <div className="space-y-1.5 focus:outline-none">
-                <label className="text-slate-700 text-xs font-semibold block">Select Banner Concept</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {COVER_IMAGES.map((img) => (
-                    <button
-                      key={img.id}
-                      type="button"
-                      onClick={() => setNewTripImg(img.url)}
-                      className={`p-2.5 border rounded-xl text-xs font-semibold tracking-tight text-slate-700 transition hover:bg-slate-50 cursor-pointer flex items-center justify-between bg-white ${
-                        newTripImg === img.url ? 'border-semibold border-indigo-600 bg-indigo-50/50 text-indigo-900' : 'border-slate-200'
-                      }`}
-                    >
-                      <span>{img.label}</span>
-                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: img.id === 'img_alps' ? '#64748b' : img.id === 'img_tropical' ? '#0d9488' : '#4f46e5' }} />
-                    </button>
-                  ))}
+                <div className="space-y-1">
+                  <label className="text-slate-700 text-xs font-semibold">Currency Choice</label>
+                  <select
+                    value={newTripCurrency}
+                    onChange={(e) => setNewTripCurrency(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-indigo-500 bg-white"
+                  >
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="CHF">CHF (CHF)</option>
+                    <option value="JPY">JPY (¥)</option>
+                    <option value="CAD">CAD (CA$)</option>
+                    <option value="AUD">AUD (A$)</option>
+                    <option value="INR">INR (₹)</option>
+                  </select>
                 </div>
               </div>
 

@@ -28,6 +28,17 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
   const [activeTab, setActiveTab] = useState<ModeType>('places');
   const [showAddModal, setShowAddModal] = useState(false);
 
+  const symbol = trip.currency ? (
+    trip.currency === 'USD' ? '$' :
+    trip.currency === 'EUR' ? '€' :
+    trip.currency === 'GBP' ? '£' :
+    trip.currency === 'CHF' ? 'CHF ' :
+    trip.currency === 'JPY' ? '¥' :
+    trip.currency === 'CAD' ? 'CA$' :
+    trip.currency === 'AUD' ? 'A$' :
+    trip.currency === 'INR' ? '₹' : '$'
+  ) : '$';
+
   // Form Inputs State
   const [name, setName] = useState('');
   const [expectedCost, setExpectedCost] = useState<number>(0);
@@ -299,7 +310,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                         <div className="flex items-center gap-1 text-[11px] text-stone-600">
                           <DollarSign className="w-3.5 h-3.5 text-stone-400" />
                           <span>Est Cost:</span>
-                          <span className="font-bold text-stone-800">${place.expectedCost}</span>
+                          <span className="font-bold text-stone-800">{symbol}{place.expectedCost}</span>
                         </div>
                         <div className="flex items-center gap-1 text-[11px] text-stone-600">
                           <Clock className="w-3.5 h-3.5 text-stone-400" />
@@ -317,7 +328,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                         <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Update Actual Spent</div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <span className="text-[9px] text-stone-400 block font-semibold">Cost ($)</span>
+                            <span className="text-[9px] text-stone-400 block font-semibold">Cost ({symbol.trim()})</span>
                             <input 
                               type="number" 
                               value={actualCostVal}
@@ -357,7 +368,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                           <div className="bg-emerald-50 text-emerald-800 p-2.5 rounded-xl text-[11px] border border-emerald-200/50 flex flex-col items-start md:items-end">
                             <span className="font-bold text-[10px] text-emerald-700 font-sans uppercase">Actual Spent Metrics</span>
                             <div className="grid grid-cols-2 gap-3 mt-1 text-xs">
-                              <span className="font-mono">Spent: <strong className="text-emerald-900">${place.actualCost}</strong></span>
+                              <span className="font-mono">Spent: <strong className="text-emerald-900">{symbol}{place.actualCost}</strong></span>
                               <span className="font-mono">Time: <strong className="text-emerald-900">{place.actualTime}</strong></span>
                             </div>
                             <button 
@@ -431,7 +442,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                         <div className="flex items-center gap-1 text-[11px] text-stone-600">
                           <DollarSign className="w-3.5 h-3.5 text-stone-400" />
                           <span>Est Cost:</span>
-                          <span className="font-bold text-stone-800">${act.expectedCost}</span>
+                          <span className="font-bold text-stone-800">{symbol}{act.expectedCost}</span>
                         </div>
                         <div className="flex items-center gap-1 text-[11px] text-stone-600">
                           <Clock className="w-3.5 h-3.5 text-stone-400" />
@@ -449,7 +460,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                         <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Update Spent Details</div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <span className="text-[9px] text-stone-400 block font-semibold">Cost ($)</span>
+                            <span className="text-[9px] text-stone-400 block font-semibold">Cost ({symbol.trim()})</span>
                             <input 
                               type="number" 
                               value={actualCostVal}
@@ -488,7 +499,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                           <div className="bg-emerald-50 text-emerald-800 p-2.5 rounded-xl text-[11px] border border-emerald-200/50 flex flex-col items-start md:items-end">
                             <span className="font-bold text-[10px] text-emerald-700 font-sans uppercase">Actual Spent Metrics</span>
                             <div className="grid grid-cols-2 gap-3 mt-1 text-xs">
-                              <span className="font-mono">Spent: <strong className="text-emerald-900">${act.actualCost}</strong></span>
+                              <span className="font-mono">Spent: <strong className="text-emerald-900">{symbol}{act.actualCost}</strong></span>
                               <span className="font-mono">Time: <strong className="text-emerald-900">{act.actualTime}</strong></span>
                             </div>
                             <button 
@@ -562,7 +573,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                         <div className="flex items-center gap-1 text-[11px] text-stone-600">
                           <DollarSign className="w-3.5 h-3.5 text-stone-400" />
                           <span>Est Cost:</span>
-                          <span className="font-bold text-stone-800">${trans.expectedCost}</span>
+                          <span className="font-bold text-stone-800">{symbol}{trans.expectedCost}</span>
                         </div>
                         <div className="flex items-center gap-1 text-[11px] text-stone-600">
                           <Clock className="w-3.5 h-3.5 text-stone-400" />
@@ -580,7 +591,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                         <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Update Spent Details</div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <span className="text-[9px] text-stone-400 block font-semibold">Cost ($)</span>
+                            <span className="text-[9px] text-stone-400 block font-semibold">Cost ({symbol.trim()})</span>
                             <input 
                               type="number" 
                               value={actualCostVal}
@@ -619,7 +630,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                           <div className="bg-emerald-50 text-emerald-800 p-2.5 rounded-xl text-[11px] border border-emerald-200/50 flex flex-col items-start md:items-end">
                             <span className="font-bold text-[10px] text-emerald-700 font-sans uppercase">Actual Spent Metrics</span>
                             <div className="grid grid-cols-2 gap-3 mt-1 text-xs">
-                              <span className="font-mono">Spent: <strong className="text-emerald-950">${trans.actualCost}</strong></span>
+                              <span className="font-mono">Spent: <strong className="text-emerald-950">{symbol}{trans.actualCost}</strong></span>
                               <span className="font-mono">Time: <strong className="text-emerald-950">{trans.actualTime}</strong></span>
                             </div>
                             <button 
@@ -689,7 +700,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                         <div className="flex items-center gap-1 text-[11px] text-stone-600">
                           <DollarSign className="w-3.5 h-3.5 text-stone-400" />
                           <span>Est Cost:</span>
-                          <span className="font-bold text-stone-800">${din.expectedCost}</span>
+                          <span className="font-bold text-stone-800">{symbol}{din.expectedCost}</span>
                         </div>
                         <div className="flex items-center gap-1 text-[11px] text-stone-600">
                           <Clock className="w-3.5 h-3.5 text-stone-400" />
@@ -707,7 +718,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                         <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Update Spent Details</div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <span className="text-[9px] text-stone-400 block font-semibold">Cost ($)</span>
+                            <span className="text-[9px] text-stone-400 block font-semibold">Cost ({symbol.trim()})</span>
                             <input 
                               type="number" 
                               value={actualCostVal}
@@ -746,7 +757,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
                           <div className="bg-emerald-50 text-emerald-800 p-2.5 rounded-xl text-[11px] border border-emerald-200/50 flex flex-col items-start md:items-end">
                             <span className="font-bold text-[10px] text-emerald-700 font-sans uppercase">Actual Spent Metrics</span>
                             <div className="grid grid-cols-2 gap-3 mt-1 text-xs">
-                              <span className="font-mono">Spent: <strong className="text-emerald-950">${din.actualCost}</strong></span>
+                              <span className="font-mono">Spent: <strong className="text-emerald-950">{symbol}{din.actualCost}</strong></span>
                               <span className="font-mono">Time: <strong className="text-emerald-950">{din.actualTime}</strong></span>
                             </div>
                             <button 
@@ -882,7 +893,7 @@ export default function TimelineManager({ trip, onUpdateTrip }: TimelineManagerP
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-stone-700 text-xs font-semibold flex items-center gap-1">
-                    <DollarSign className="w-3.5 h-3.5 text-stone-400" /> Expected Cost ($)
+                    <DollarSign className="w-3.5 h-3.5 text-stone-400" /> Expected Cost ({symbol.trim()})
                   </label>
                   <input
                     type="number"

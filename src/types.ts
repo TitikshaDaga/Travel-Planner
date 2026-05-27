@@ -70,6 +70,7 @@ export interface Trip {
   endDate: string;
   budget: number;
   coverImage?: string;
+  currency?: string;
   ownerId: string;
   ownerEmail: string;
   ownerName?: string;
