@@ -28,9 +28,11 @@ import { dbService } from '../lib/db';
 
 interface LandingPageProps {
   onLogin: (customEmail?: string, customName?: string) => void;
+  authErrorMsg?: string | null;
+  onClearAuthError?: () => void;
 }
 
-export default function LandingPage({ onLogin }: LandingPageProps) {
+export default function LandingPage({ onLogin, authErrorMsg, onClearAuthError }: LandingPageProps) {
   const [activePreviewTab, setActivePreviewTab] = useState<'schedule' | 'finance' | 'documents' | 'group'>('schedule');
   const [pwaPlatform, setPwaPlatform] = useState<'ios' | 'android'>('ios');
 
@@ -167,9 +169,15 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-[10px] text-slate-400 font-mono tracking-wide uppercase flex items-center gap-1.5"
+          className="text-[10px] text-slate-400 font-mono tracking-wide uppercase flex flex-col items-center gap-1.5"
         >
-          🏁 Dual-State Cloud Sync Enabled • Secure Encrypted Vault
+          <span>🏁 Dual-State Cloud Sync Enabled • Secure Encrypted Vault</span>
+          <button 
+            onClick={() => setShowGoogleMockAuth(true)}
+            className="text-xs text-indigo-600 hover:text-indigo-700 underline font-extrabold normal-case transition cursor-pointer mt-1"
+          >
+            Or sign in via guest sandbox simulator (no Firebase setup required)
+          </button>
         </motion.span>
 
         {/* Realistic Interactive Applet Preview Frame */}
@@ -1191,6 +1199,74 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             </div>
           </div>
 
+        </div>
+      )}
+
+      {authErrorMsg && (
+        <div className="fixed inset-0 z-[10000] bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center overflow-y-auto p-4 select-none font-sans text-slate-900">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-[550px] w-full p-6 md:p-8 shadow-2xl flex flex-col justify-between mx-auto my-auto relative">
+            
+            {/* Top Close icon */}
+            <button 
+              onClick={() => onClearAuthError?.()}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              title="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 text-rose-600">
+                <AlertTriangle className="w-8 h-8 shrink-0" />
+                <h3 className="text-xl font-bold tracking-tight text-slate-900">
+                  Google Sign-In Configuration Required
+                </h3>
+              </div>
+
+              <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 text-xs md:text-sm text-rose-800 space-y-2">
+                <p className="font-semibold text-slate-800">What went wrong:</p>
+                <p className="font-mono leading-relaxed bg-white/60 p-2.5 rounded-lg border border-rose-100/50 break-words">{authErrorMsg}</p>
+              </div>
+
+              <div className="space-y-3.5 text-xs text-slate-600">
+                <h4 className="font-bold text-slate-900 text-sm">How to resolve this in Firebase Console:</h4>
+                <ul className="space-y-2.5 list-decimal pl-4 leading-relaxed">
+                  <li>
+                    Open your <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline font-semibold">Firebase Console</a> for project <span className="font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">charged-valve-3fbwx</span>.
+                  </li>
+                  <li>
+                    <strong>For "Unauthorized Domain" error:</strong> Go to <span className="font-semibold text-slate-800">Authentication</span> &gt; <span className="font-semibold text-slate-800">Settings</span> &gt; <span className="font-semibold text-slate-800">Authorized Domains</span>, click "Add Domain", and enter:
+                    <div className="mt-1 flex items-center gap-1.5 font-mono bg-indigo-50/80 border border-indigo-100/60 p-2 rounded-lg text-indigo-700 font-bold select-all overflow-x-auto">
+                      {window.location.hostname}
+                    </div>
+                  </li>
+                  <li>
+                    <strong>For "Operation Not Allowed" error:</strong> Go to <span className="font-semibold text-slate-800">Authentication</span> &gt; <span className="font-semibold text-slate-800">Sign-in method</span> (or "Providers"), click <span className="font-semibold text-slate-800">Add new provider</span>, choose <span className="font-semibold text-slate-800 font-bold">Google</span>, and toggle it to **Enabled** (then save).
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <button
+                  onClick={() => {
+                    // Activate Mock Mode account selection popup!
+                    onClearAuthError?.();
+                    setShowGoogleMockAuth(true);
+                  }}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm rounded-xl transition cursor-pointer text-center shadow-lg shadow-indigo-100 flex items-center justify-center gap-2"
+                >
+                  <User className="w-4 h-4" /> Sign In via Sandbox (No setup needed)
+                </button>
+                <button
+                  onClick={() => onClearAuthError?.()}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition cursor-pointer text-center"
+                >
+                  Close & Dismiss
+                </button>
+              </div>
+            </div>
+
+          </div>
         </div>
       )}
 

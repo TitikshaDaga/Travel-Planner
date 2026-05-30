@@ -166,12 +166,14 @@ function saveOfflineUser(user: UserProfile | null) {
 // DB Core Functions
 export const dbService = {
   isMockEnabled(): boolean {
-    return isMockFirebase || !db;
+    const offlineUser = getOfflineUser();
+    const isMockUser = offlineUser?.uid?.startsWith('user_mock_');
+    return isMockFirebase || !db || isMockUser;
   },
 
   // Auth operations
   async loginWithGoogle(customEmail?: string, customName?: string): Promise<UserProfile> {
-    if (this.isMockEnabled() || !auth || !googleProvider) {
+    if (this.isMockEnabled() || !auth || !googleProvider || customEmail) {
       // Return custom mock user based on chosen details
       const email = customEmail || 'titikshadaga19@gmail.com';
       const displayName = customName || email.split('@')[0].split('.').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
@@ -220,7 +222,11 @@ export const dbService = {
     if (this.isMockEnabled() || !auth) {
       return;
     }
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn("Sign out errored or bypassed:", err);
+    }
   },
 
   subscribeAuth(callback: (user: UserProfile | null) => void) {
@@ -243,8 +249,11 @@ export const dbService = {
         saveOfflineUser(profile);
         callback(profile);
       } else {
-        saveOfflineUser(null);
-        callback(null);
+        const localUser = getOfflineUser();
+        if (!localUser || !localUser.uid?.startsWith('user_mock_')) {
+          saveOfflineUser(null);
+          callback(null);
+        }
       }
     });
   },

@@ -37,6 +37,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isOnlineSimulated, setIsOnlineSimulated] = useState(true);
+  const [authErrorMsg, setAuthErrorMsg] = useState<string | null>(null);
 
   // Trips Lists state
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -92,10 +93,22 @@ export default function App() {
 
   const handleLogin = async (customEmail?: string, customName?: string) => {
     try {
+      setAuthErrorMsg(null);
       const user = await dbService.loginWithGoogle(customEmail, customName);
       setCurrentUser(user);
-    } catch (e) {
-      alert("Failed Google Auth. Please check your credentials or run in mock mode.");
+    } catch (e: any) {
+      console.error("Login failed:", e);
+      let msg = e?.message || String(e);
+      if (e?.code === 'auth/unauthorized-domain' || (typeof msg === 'string' && msg.includes('unauthorized-domain'))) {
+        msg = `Unauthorized Domain: The current domain "${window.location.hostname}" is not whitelisted in your Firebase console. Please add it to your Authorized domains under Authentication > Settings > Authorized Domains.`;
+      } else if (e?.code === 'auth/operation-not-allowed' || (typeof msg === 'string' && msg.includes('operation-not-allowed'))) {
+        msg = `Operation Not Allowed: Google Sign-In is not enabled as a Sign-In provider in your Firebase project console. Please enable Google Sign-In under Authentication > Sign-in method in your Firebase console.`;
+      } else if (e?.code === 'auth/popup-closed-by-user' || (typeof msg === 'string' && msg.includes('popup-closed-by-user'))) {
+        msg = `The Google sign-in popup was closed before completing. Please try again.`;
+      } else if (e?.code === 'auth/popup-blocked' || (typeof msg === 'string' && msg.includes('popup-blocked'))) {
+        msg = `Popup Blocked: Your browser blocked the Google authentication popup. Please allow popups for this site.`;
+      }
+      setAuthErrorMsg(msg);
     }
   };
 
@@ -180,7 +193,13 @@ export default function App() {
 
   // Login Screen if unauthorized
   if (!currentUser) {
-    return <LandingPage onLogin={handleLogin} />;
+    return (
+      <LandingPage 
+        onLogin={handleLogin} 
+        authErrorMsg={authErrorMsg}
+        onClearAuthError={() => setAuthErrorMsg(null)}
+      />
+    );
   }
 
   return (
